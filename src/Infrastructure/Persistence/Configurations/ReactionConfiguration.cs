@@ -20,6 +20,7 @@ public class ReactionConfiguration : IEntityTypeConfiguration<Reaction>
             .HasMaxLength(20);
 
         builder.HasIndex(r => new { r.MessageId, r.FromPhoneNumber, r.Emoji })
-            .IsUnique();
+            .IsUnique()
+            .HasDatabaseName("IX_Reactions_MessageId_From_Emoji");
     }
 }

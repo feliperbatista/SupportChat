@@ -16,7 +16,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
 
         builder.HasIndex(m => m.WhatsAppMessageId)
             .IsUnique()
-            .HasFilter("\"WhatsAppMessageId\" IS NOT NULL");
+            .HasFilter("[WhatsAppMessageId] IS NOT NULL");
 
         builder.Property(m => m.Content)
             .HasMaxLength(4096);

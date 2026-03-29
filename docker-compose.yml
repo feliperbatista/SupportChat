@@ -1,21 +1,21 @@
 services:
-  postgres:
-    image: postgres:16-alpine
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: whatsapp_support_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: whatsapp_support
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Your_password123"
+      MSSQL_PID: "Developer"
     ports:
-      - "5432:5432"
+      - "1433:1433"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - sqldata:/var/lib/mssqlql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Your_password123 -Q 'SELECT 1'"]
+      interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  pgdata:
+  sqldata:

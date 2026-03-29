@@ -19,7 +19,7 @@ public static class DependencyInjection
     )
     {
         services.AddDbContext<AppDbContext>(options => 
-            options.UseNpgsql(config.GetConnectionString("Default")));
+            options.UseSqlServer(config.GetConnectionString("Default")));
 
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.AddScoped<IContactRepository, ContactRepository>();

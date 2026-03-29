@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class IntialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,15 +15,15 @@ namespace Infrastructure.Migrations
                 name: "Agents",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: false),
-                    AvatarUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AvatarUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,12 +34,12 @@ namespace Infrastructure.Migrations
                 name: "Contacts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    ProfilePictureUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,14 +50,14 @@ namespace Infrastructure.Migrations
                 name: "Conversations",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ContactId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AssignedAgentId = table.Column<Guid>(type: "uuid", nullable: true),
-                    AssignedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ClosedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ContactId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssignedAgentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ClosedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -80,19 +80,19 @@ namespace Infrastructure.Migrations
                 name: "Messages",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    WhatsAppMessageId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    ConversationId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Content = table.Column<string>(type: "character varying(4096)", maxLength: 4096, nullable: false),
-                    Type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    MediaUrl = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    MediaMimeType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    MediaId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    IsFromAgent = table.Column<bool>(type: "boolean", nullable: false),
-                    SentByAgentId = table.Column<Guid>(type: "uuid", nullable: true),
-                    QuotedMessageId = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    WhatsAppMessageId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ConversationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    MediaUrl = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    MediaMimeType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    MediaId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    IsFromAgent = table.Column<bool>(type: "bit", nullable: false),
+                    SentByAgentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    QuotedMessageId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -109,12 +109,12 @@ namespace Infrastructure.Migrations
                 name: "Reactions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Emoji = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    FromPhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    IsFromAgent = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Emoji = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    FromPhoneNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IsFromAgent = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -169,10 +169,10 @@ namespace Infrastructure.Migrations
                 table: "Messages",
                 column: "WhatsAppMessageId",
                 unique: true,
-                filter: "\"WhatsAppMessageId\" IS NOT NULL");
+                filter: "[WhatsAppMessageId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reactions_MessageId_FromPhoneNumber_Emoji",
+                name: "IX_Reactions_MessageId_From_Emoji",
                 table: "Reactions",
                 columns: new[] { "MessageId", "FromPhoneNumber", "Emoji" },
                 unique: true);
