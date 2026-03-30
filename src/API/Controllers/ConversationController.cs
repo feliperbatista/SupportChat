@@ -15,7 +15,7 @@ namespace API.Controllers;
 [ApiController]
 public class ConversationController(ISender mediator) : ControllerBase
 {
-    private Guid AgentId => Guid.Parse(User.FindFirst("sub")!.Value);
+    private Guid AgentId => Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
 
     [HttpGet("queue")]
     public async Task<IActionResult> GetQueue(CancellationToken ct)
@@ -27,7 +27,7 @@ public class ConversationController(ISender mediator) : ControllerBase
     [HttpGet("mine")]
     public async Task<IActionResult> GetMine(CancellationToken ct)
     {
-        var result = mediator.Send(new GetMyConversationsQuery(AgentId), ct);
+        var result = await mediator.Send(new GetMyConversationsQuery(AgentId), ct);
         return Ok(result);
     }
 
