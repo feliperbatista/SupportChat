@@ -15,7 +15,7 @@ public class AgentRepository(AppDbContext db) : IAgentRepository
         => await db.Agents.Where(a => a.IsActive).ToListAsync(ct);
 
     public async Task<Agent?> GetByEmailAsync(string email, CancellationToken ct = default)
-        => await db.Agents.FirstOrDefaultAsync(a => a.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase), ct);
+        => await db.Agents.FirstOrDefaultAsync(a => a.Email == email.ToLowerInvariant(), ct);
 
     public async Task<Agent?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await db.Agents.FirstOrDefaultAsync(a => a.Id == id, ct);
