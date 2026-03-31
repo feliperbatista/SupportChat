@@ -115,7 +115,6 @@ public class ProcessWebhookCommandHandler(
 
             if (conversation.IsInQueue())
                 await notifications.NotifyConversationQueuedAsync(conversation.ToDto(), ct);
-            
         }
     }
 
