@@ -1,6 +1,8 @@
 using System;
 using System.Net;
 using System.Text.Json;
+using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Middleware;
 
@@ -12,11 +14,43 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         {
             await next(context);
         }
+        catch(ValidationException ex)
+        {
+            await HandleValidationException(context, ex);
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
             await HandleExceptionAsync(context, ex);
         }
+    }
+
+    private async Task HandleValidationException(HttpContext context, ValidationException ex)
+    {
+        var validationErrros = new Dictionary<string, string[]>();
+
+        if (ex.Errors is not null)
+        {
+            foreach (var error in ex.Errors)
+            {
+                if (validationErrros.TryGetValue(error.PropertyName, out var existingErrors))
+                    validationErrros[error.PropertyName] = [.. existingErrors, error.ErrorMessage];
+                else
+                    validationErrros[error.PropertyName] = [error.ErrorMessage];
+            }
+        }
+
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+        var validationProblemDetails = new ValidationProblemDetails(validationErrros)
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Type = "ValidationFailure",
+            Title = "Validation error",
+            Detail = "One or more validation error has occured"
+        };
+
+        await context.Response.WriteAsJsonAsync(validationProblemDetails);
     }
 
     private static Task HandleExceptionAsync(HttpContext context, Exception ex)

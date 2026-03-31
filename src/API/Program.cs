@@ -1,18 +1,25 @@
 using System.Text;
 using API.Middleware;
+using Application.Common;
+using Application.Features.Agents.Validators;
 using Application.Features.Auth.Commands;
+using FluentValidation;
 using Infrastructure;
 using Infrastructure.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddMediatR(cfg => 
-    cfg.RegisterServicesFromAssembly(typeof(LoginCommand).Assembly));
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(LoginCommand).Assembly);
+
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
+builder.Services.AddValidatorsFromAssemblyContaining<CreateAgentValidator>();
 
 var jwtSecret = builder.Configuration["Jwt:Secret"]!;
 builder.Services
