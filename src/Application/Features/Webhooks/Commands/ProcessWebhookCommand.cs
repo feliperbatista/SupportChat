@@ -163,7 +163,6 @@ public class ProcessWebhookCommandHandler(
         _          => MessageType.Unknown
     };
 
-
     private static string? TryGet(JsonElement el, string prop1, string prop2)
     {
         if (el.TryGetProperty(prop1, out var inner) &&
