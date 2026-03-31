@@ -131,6 +131,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("AssignedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("datetime2");
 
@@ -152,11 +155,34 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("AssignedAgentId");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("ContactId");
 
                     b.HasIndex("Status");
 
                     b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ConversationCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Department", b =>
@@ -296,6 +322,11 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("AssignedAgentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Domain.Entities.ConversationCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Domain.Entities.Contact", "Contact")
                         .WithMany("Conversations")
                         .HasForeignKey("ContactId")
@@ -304,7 +335,20 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("AssignedAgent");
 
+                    b.Navigation("Category");
+
                     b.Navigation("Contact");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ConversationCategory", b =>
+                {
+                    b.HasOne("Domain.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("Domain.Entities.Message", b =>

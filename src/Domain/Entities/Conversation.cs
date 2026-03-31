@@ -17,6 +17,8 @@ public class Conversation
     public DateTime? ClosedAt { get; set; }
     public ICollection<Department> Departments { get; private set; } = [];
     public ICollection<Message> Messages { get; private set; } = [];
+    public Guid? CategoryId { get; private set; }
+    public ConversationCategory? Category { get; private set; }
 
     private Conversation() {}
 
@@ -40,11 +42,12 @@ public class Conversation
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Resolve()
+    public void Resolve(Guid categoryId)
     {
         Status = ConversationStatus.Resolved;
         ClosedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        CategoryId = categoryId;
     }
 
     public void Reopen()

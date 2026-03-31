@@ -31,17 +31,17 @@ public class ConversationController(ISender mediator) : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("{id:guid}/assign")]
+    [HttpPatch("{id:guid}/assign")]
     public async Task<IActionResult> Assign(Guid id, CancellationToken ct)
     {
         var result = await mediator.Send(new AssignConversationCommand(id, AgentId), ct);
         return Ok(result);
     }
 
-    [HttpPost("{id:guid}/resolve")]
-    public async Task<IActionResult> Resolve(Guid id, CancellationToken ct)
+    [HttpPatch("{id:guid}/resolve")]
+    public async Task<IActionResult> Resolve(Guid id, ResolveRequest request, CancellationToken ct)
     {
-        var result = await mediator.Send(new ResolveConversationCommand(id, AgentId), ct);
+        var result = await mediator.Send(new ResolveConversationCommand(id, AgentId, request.CategoryId), ct);
         return Ok(result);
     }
 
@@ -60,7 +60,7 @@ public class ConversationController(ISender mediator) : ControllerBase
     }
 
     [HttpPost("{id:guid}/messages/{messageId:guid}/react")]
-    public async Task<IActionResult> React(Guid messageId, ReactRequest request, CancellationToken ct)
+    public async Task<IActionResult> React(System.Guid id, Guid messageId, ReactRequest request, CancellationToken ct)
     {
         await mediator.Send(new SendReactionCommand(messageId, AgentId, request.Emoji), ct);
         return Ok();
@@ -69,3 +69,4 @@ public class ConversationController(ISender mediator) : ControllerBase
 
 public record SendMessageRequest(string Content, MessageType Type, string? MediaUrl);
 public record ReactRequest(string Emoji);
+public record ResolveRequest(Guid CategoryId);

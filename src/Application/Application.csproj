@@ -35,7 +35,6 @@
     <Folder Include="Features\Messages\Queries\" />
     <Folder Include="Features\Webhooks\" />
     <Folder Include="Features\Webhooks\Commands\" />
-    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>
