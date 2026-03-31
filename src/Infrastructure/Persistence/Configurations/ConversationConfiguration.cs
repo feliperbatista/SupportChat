@@ -31,6 +31,10 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
             .HasForeignKey(m => m.ConversationId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(c => c.Departments)
+            .WithMany(d => d.Conversations)
+            .UsingEntity(j => j.ToTable("ConversationDepartments"));
+
         builder.HasIndex(c => c.AssignedAgentId);
         builder.HasIndex(c => c.Status);
     }

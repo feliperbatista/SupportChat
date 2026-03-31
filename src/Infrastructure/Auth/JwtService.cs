@@ -32,6 +32,7 @@ private readonly JwtOptions _opts = opts.Value;
             new Claim(JwtRegisteredClaimNames.Email, agent.Email),
             new Claim(JwtRegisteredClaimNames.Name, agent.Name),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Role, agent.Role.ToString())
         };
 
         var token = new JwtSecurityToken(

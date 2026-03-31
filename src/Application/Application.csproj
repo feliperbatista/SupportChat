@@ -27,6 +27,9 @@
     <Folder Include="Features\Conversations\" />
     <Folder Include="Features\Conversations\Commands\" />
     <Folder Include="Features\Conversations\Queries\" />
+    <Folder Include="Features\Departments\" />
+    <Folder Include="Features\Departments\Commands\" />
+    <Folder Include="Features\Departments\Queries\" />
     <Folder Include="Features\Messages\" />
     <Folder Include="Features\Messages\Commands\" />
     <Folder Include="Features\Messages\Queries\" />

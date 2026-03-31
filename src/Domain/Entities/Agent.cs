@@ -14,6 +14,7 @@ public class Agent
     public bool IsActive { get; private set; } = true;
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+    public AgentRole Role { get; private set; } = AgentRole.User;
 
     public ICollection<Conversation> Conversations { get; private set; } = [];
 

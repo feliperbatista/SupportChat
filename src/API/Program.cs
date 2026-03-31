@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using API.Middleware;
 using Application.Common;
@@ -36,7 +37,8 @@ builder.Services
             ValidateAudience = true,
             ValidAudience    = builder.Configuration["Jwt:Audience"],
             ValidateLifetime = true,
-            NameClaimType    = "sub"
+            NameClaimType    = "sub",
+            RoleClaimType    = ClaimTypes.Role
         };
 
         options.Events = new JwtBearerEvents
@@ -53,7 +55,9 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("CanManageDepartments", policy => 
+        policy.RequireRole("Admin"));
 
 builder.Services.AddSignalR();
 

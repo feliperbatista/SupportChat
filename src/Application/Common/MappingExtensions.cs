@@ -50,4 +50,9 @@ public static class MappingExtensions
         c.UpdatedAt,
         c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault()?.ToDto()
     );
+
+    public static DepartmentDto ToDto(this Department d) => new(
+        d.Id,
+        d.Name
+    );
 }

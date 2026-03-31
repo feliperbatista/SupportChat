@@ -22,6 +22,21 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ConversationDepartment", b =>
+                {
+                    b.Property<Guid>("ConversationsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DepartmentsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ConversationsId", "DepartmentsId");
+
+                    b.HasIndex("DepartmentsId");
+
+                    b.ToTable("ConversationDepartments", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.Agent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -50,6 +65,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -139,6 +157,22 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Department", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("Domain.Entities.Message", b =>
@@ -238,6 +272,21 @@ namespace Infrastructure.Migrations
                         .HasDatabaseName("IX_Reactions_MessageId_From_Emoji");
 
                     b.ToTable("Reactions");
+                });
+
+            modelBuilder.Entity("ConversationDepartment", b =>
+                {
+                    b.HasOne("Domain.Entities.Conversation", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Department", null)
+                        .WithMany()
+                        .HasForeignKey("DepartmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.Conversation", b =>

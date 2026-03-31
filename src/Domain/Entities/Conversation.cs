@@ -15,7 +15,7 @@ public class Conversation
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ClosedAt { get; set; }
-
+    public ICollection<Department> Departments { get; private set; } = [];
     public ICollection<Message> Messages { get; private set; } = [];
 
     private Conversation() {}

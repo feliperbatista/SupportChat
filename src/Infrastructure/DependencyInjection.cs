@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 
         services.Configure<WhatsAppOptions>(config.GetSection("WhatsApp"));
         services.AddHttpClient<IWhatsAppService, WhatsAppService>(client =>
