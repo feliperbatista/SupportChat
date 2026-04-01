@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Middleware;
 
-public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -53,7 +53,7 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         await context.Response.WriteAsJsonAsync(validationProblemDetails);
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         var (statusCode, message) = ex switch
         {
@@ -61,7 +61,7 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
             UnauthorizedAccessException => (HttpStatusCode.Forbidden, ex.Message),
             InvalidOperationException => (HttpStatusCode.BadRequest, ex.Message),
             ArgumentException => (HttpStatusCode.BadGateway, ex.Message),
-            _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred."),
+            _ => (HttpStatusCode.InternalServerError, env.IsDevelopment() ? ex.Message : "An unexpected error occurred."),
         };
 
         context.Response.ContentType = "application/json";
