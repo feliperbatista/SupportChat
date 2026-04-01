@@ -10,5 +10,5 @@ public interface IWhatsAppService
     Task<string> SendDocumentAsync(string to, string documentUrl, string fileName, CancellationToken ct = default);
     Task SendReactionAsync(string to, string whatsAppMessageId, string emoji, CancellationToken ct = default);
     Task MarkAsReadAsync(string whatsAppMessageId, CancellationToken ct = default);
-    Task<string> DownloadMediaAsync(string mediaId, string emoji, CancellationToken ct = default);
+    Task<string> GetMediaUrl(string mediaId, CancellationToken ct = default);
 }

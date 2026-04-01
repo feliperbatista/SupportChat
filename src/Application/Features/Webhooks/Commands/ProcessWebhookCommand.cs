@@ -94,7 +94,8 @@ public class ProcessWebhookCommandHandler(
                 await conversationRepo.SaveChangesAsync(ct);
             }
 
-            var (content, mediaId, mediaUrl, mimeType) = ParseMessageContent(msg, typeStr);
+            var (content, mediaId, mimeType) = ParseMessageContent(msg, typeStr);
+            var mediaUrl = string.IsNullOrEmpty(mediaId) ? null : await whatsApp.GetMediaUrl(mediaId, ct);
             var messageType = ParseMessageType(typeStr);
 
             if (messageType == MessageType.Reaction)
@@ -136,17 +137,17 @@ public class ProcessWebhookCommandHandler(
         await notifications.NotifyReactionAsync(conversation.Id, targetMessage.Id, emoji, from, ct);
     }
 
-    private static (string content, string? mediaId, string? mediaUrl, string? mimeType) ParseMessageContent(JsonElement msg, string type)
+    private static (string content, string? mediaId, string? mimeType) ParseMessageContent(JsonElement msg, string type)
     {
         return type switch
         {
-            "text"     => (msg.GetProperty("text").GetProperty("body").GetString()!, null, null, null),
-            "image"    => (TryGet(msg, "image", "caption") ?? "", TryGet(msg, "image", "id"), null, TryGet(msg, "image", "mime_type")),
-            "audio"    => ("", TryGet(msg, "audio", "id"), null, TryGet(msg, "audio", "mime_type")),
-            "video"    => (TryGet(msg, "video", "caption") ?? "", TryGet(msg, "video", "id"), null, TryGet(msg, "video", "mime_type")),
-            "document" => (TryGet(msg, "document", "filename") ?? "", TryGet(msg, "document", "id"), null, TryGet(msg, "document", "mime_type")),
-            "sticker"  => ("", TryGet(msg, "sticker", "id"), null, null),
-            _          => ("Unsupported message type", null, null, null)
+            "text"     => (msg.GetProperty("text").GetProperty("body").GetString()!, null, null),
+            "image"    => (TryGet(msg, "image", "caption") ?? "", TryGet(msg, "image", "id"), TryGet(msg, "image", "mime_type")),
+            "audio"    => ("", TryGet(msg, "audio", "id"), TryGet(msg, "audio", "mime_type")),
+            "video"    => (TryGet(msg, "video", "caption") ?? "", TryGet(msg, "video", "id"), TryGet(msg, "video", "mime_type")),
+            "document" => (TryGet(msg, "document", "filename") ?? "", TryGet(msg, "document", "id"), TryGet(msg, "document", "mime_type")),
+            "sticker"  => ("", TryGet(msg, "sticker", "id"), null),
+            _          => ("Unsupported message type", null, null)
         };
     }
 

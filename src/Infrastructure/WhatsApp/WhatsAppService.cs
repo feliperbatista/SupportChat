@@ -11,15 +11,19 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
     private readonly string _messagesUrl =
         $"https://graph.facebook.com/v19.0/{opts.Value.PhoneNumberId}/messages";
 
-    public async Task<string> DownloadMediaAsync(string mediaId, string emoji, CancellationToken ct = default)
+    private readonly Func<string, string> _mediaUrl = mediaId 
+        => $"https://graph.facebook.com/v19.0/{mediaId}?phone_number_id={opts.Value.PhoneNumberId}";
+
+    public async Task<string> GetMediaUrl(string mediaId, CancellationToken ct = default)
     {
-        var metaUrl = $"https://graph.facebook.com/v19.0/{mediaId}";
-        var meta = await http.GetFromJsonAsync<JsonElement>(metaUrl, ct);
+        var url = _mediaUrl(mediaId);
+        var meta = await http.GetFromJsonAsync<JsonElement>(url, ct);
         var downloadUrl = meta.GetProperty("url").GetString()!;
+        return downloadUrl;
 
-        var bytes = await http.GetByteArrayAsync(downloadUrl, ct);
+        // var bytes = await http.GetByteArrayAsync(downloadUrl, ct);
 
-        return Convert.ToBase64String(bytes);
+        // return Convert.ToBase64String(bytes);
     }
 
     public Task MarkAsReadAsync(string whatsAppMessageId, CancellationToken ct = default)
