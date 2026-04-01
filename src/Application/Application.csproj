@@ -24,6 +24,9 @@
     <Folder Include="Features\Agents\Queries\" />
     <Folder Include="Features\Auth\" />
     <Folder Include="Features\Auth\Commands\" />
+    <Folder Include="Features\Categories\" />
+    <Folder Include="Features\Categories\Commands\" />
+    <Folder Include="Features\Categories\Queries\" />
     <Folder Include="Features\Conversations\" />
     <Folder Include="Features\Conversations\Commands\" />
     <Folder Include="Features\Conversations\Queries\" />

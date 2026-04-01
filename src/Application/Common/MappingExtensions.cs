@@ -55,4 +55,10 @@ public static class MappingExtensions
         d.Id,
         d.Name
     );
+
+    public static CategoryDto ToDto(this ConversationCategory c) => new(
+        c.Id,
+        c.Name,
+        c.DepartmentId
+    );
 }

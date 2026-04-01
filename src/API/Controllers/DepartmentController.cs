@@ -25,7 +25,7 @@ namespace API.Controllers
             return Ok(department);
         }
 
-        [Authorize(Policy = "CanManageDepartments")]
+        [Authorize(Policy = "CanManageCreation")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(Guid id, CancellationToken ct)
         {
@@ -33,7 +33,7 @@ namespace API.Controllers
             return NoContent();
         }
 
-        [Authorize(Policy = "CanManageDepartments")]
+        [Authorize(Policy = "CanManageCreation")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateDepartmentRequest request, CancellationToken ct)
         {
@@ -41,7 +41,7 @@ namespace API.Controllers
             return NoContent();
         }
 
-        [Authorize(Policy = "CanManageDepartments")]
+        [Authorize(Policy = "CanManageCreation")]
         [HttpPost]
         public async Task<IActionResult> Create(CreateDepartmentRequest request, CancellationToken ct)
         {

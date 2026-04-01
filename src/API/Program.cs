@@ -56,7 +56,7 @@ builder.Services
     });
 
 builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("CanManageDepartments", policy => 
+    .AddPolicy("CanManageCreation", policy => 
         policy.RequireRole("Admin"));
 
 builder.Services.AddSignalR();
