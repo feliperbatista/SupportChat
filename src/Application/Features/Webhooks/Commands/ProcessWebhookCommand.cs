@@ -130,8 +130,7 @@ public class ProcessWebhookCommandHandler(
         if (targetMessage is null) return;
 
         var reaction = Reaction.Create(targetMessage.Id, emoji, from, false);
-        targetMessage.Reactions.Add(reaction);
-        await messageRepo.UpdateAsync(targetMessage, ct);
+        await messageRepo.AddReactionAsync(reaction, ct);
         await messageRepo.SaveChangesAsync(ct);
 
         await notifications.NotifyReactionAsync(conversation.Id, targetMessage.Id, emoji, from, ct);

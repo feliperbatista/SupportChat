@@ -29,9 +29,14 @@ public class SendReactionCommandHandler(
         if (string.IsNullOrEmpty(message.WhatsAppMessageId))
             throw new InvalidOperationException("Cannot react to a message without a WhatsApp ID.");
 
-        var reacttion = Reaction.Create(request.MessageId, request.Emoji, "ageent", isFromAgent: true);
-        message.Reactions.Add(reacttion);
-        await messageRepo.UpdateAsync(message, ct);
+        var existing = message.Reactions
+            .FirstOrDefault(r => r.Emoji == request.Emoji && r.IsFromAgent);
+
+        if (existing is not null)
+            return;
+
+        var reaction = Reaction.Create(request.MessageId, request.Emoji, "agent", isFromAgent: true);
+        await messageRepo.AddReactionAsync(reaction, ct);
         await messageRepo.SaveChangesAsync(ct);
 
         await whatsApp.SendReactionAsync(conversation.Contact.PhoneNumber, message.WhatsAppMessageId, request.Emoji, ct);

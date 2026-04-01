@@ -10,6 +10,9 @@ public class MessageRepository(AppDbContext db) : IMessageRepository
     public async Task AddAsync(Message message, CancellationToken ct = default)
         => await db.Messages.AddAsync(message, ct);
 
+    public async Task AddReactionAsync(Reaction reaction, CancellationToken ct = default)
+        => await db.Reactions.AddAsync(reaction, ct);
+
     public async Task<IEnumerable<Message>> GetByConversationIdAsync(Guid conversationId, CancellationToken ct = default)
         => await db.Messages
             .Include(m => m.Reactions)

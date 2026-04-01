@@ -53,9 +53,9 @@ public class ConversationController(ISender mediator) : ControllerBase
     }
 
     [HttpPost("{id:guid}/messages")]
-    public async Task<IActionResult> SendMessage(Guid id, SendMessageRequest request, CancellationToken ct)
+    public async Task<IActionResult> SendMessage(Guid id, [FromForm] SendMessageRequest request, CancellationToken ct)
     {
-        var result = await mediator.Send(new SendMessageCommand(id, AgentId, request.Content, request.Type, request.MediaUrl), ct);
+        var result = await mediator.Send(new SendMessageCommand(id, AgentId, request.Content, request.Type, request.File?.OpenReadStream(), request.File?.FileName), ct);
         return Ok(result);
     }
 
@@ -67,6 +67,6 @@ public class ConversationController(ISender mediator) : ControllerBase
     }
 }
 
-public record SendMessageRequest(string Content, MessageType Type, string? MediaUrl);
+public record SendMessageRequest(string Content, MessageType Type, IFormFile? File);
 public record ReactRequest(string Emoji);
 public record ResolveRequest(Guid CategoryId);

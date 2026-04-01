@@ -10,7 +10,6 @@ public enum MessageType
     Video,
     Document,
     Sticker,
-    Location,
     Reaction,
     Unknown
 }

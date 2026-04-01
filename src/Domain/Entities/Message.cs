@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Enums;
 
 namespace Domain.Entities;
@@ -56,8 +57,7 @@ public class Message
         Guid conversationId,
         string content,
         MessageType type,
-        Guid sentByAgentId,
-        string? mediaUrl = null
+        Guid sentByAgentId
     )
     {
         return new Message
@@ -66,15 +66,16 @@ public class Message
             Content = content,
             Type = type,
             Status = MessageStatus.Pending,
-            MediaUrl = mediaUrl,
             IsFromAgent = true,
             SentByAgentId = sentByAgentId
         };
     }
 
-    public void SetWhatsAppId(string id)
+    public void SetWhatsAppId(string id, string? mediaId, string? mediaUrl)
     {
         WhatsAppMessageId = id;
+        MediaId = mediaId;
+        MediaUrl = mediaUrl;
     }
 
     public void UpdateStatus(MessageStatus status)

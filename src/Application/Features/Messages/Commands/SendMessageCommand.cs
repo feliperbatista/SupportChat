@@ -13,7 +13,8 @@ public record SendMessageCommand(
     Guid AgentId,
     string Content,
     MessageType Type,
-    string? MediaUrl = null
+    Stream? FileStream = null,
+    string? FileName = null
 ) : IRequest<MessageDto>;
 
 public class SendMessageCommandHandler(
@@ -35,24 +36,36 @@ public class SendMessageCommandHandler(
             request.ConversationId,
             request.Content,
             request.Type,
-            request.AgentId,
-            request.MediaUrl
+            request.AgentId
         );
 
         await messageRepo.AddAsync(message, ct);
         await messageRepo.SaveChangesAsync(ct);
 
         var phoneNumber = conversation.Contact.PhoneNumber;
+
+        string? mediaId = null;
+        string? mediaUrl = null;
+
+        if (request.FileStream is not null)
+        {
+            mediaId = await whatsApp.UploadMedia(request.FileStream, request.FileName!, ct);
+            mediaUrl = await whatsApp.GetMediaUrl(mediaId, ct);
+        }
+
         var waMessageId = request.Type switch
         {
             MessageType.Text => await whatsApp.SendTextAsync(phoneNumber, request.Content, ct),
-            MessageType.Image => await whatsApp.SendImageAsync(phoneNumber, request.MediaUrl!, request.Content, ct),
-            MessageType.Audio => await whatsApp.SendAudioAsync(phoneNumber, request.MediaUrl!, ct),
-            MessageType.Document => await whatsApp.SendDocumentAsync(phoneNumber, request.MediaUrl!, request.Content, ct),
-            _ => throw new NotSupportedException($"Message type {request.Type} not supported for outgoind.")
+            MessageType.Image => await whatsApp.SendImageAsync(phoneNumber, mediaId!, request.Content, ct),
+            MessageType.Audio => await whatsApp.SendAudioAsync(phoneNumber, mediaId!, ct),
+            MessageType.Document => await whatsApp.SendDocumentAsync(phoneNumber, mediaId!, request.Content, ct),
+            MessageType.Video => await whatsApp.SendVideoAsync(phoneNumber, mediaId!, ct),
+            MessageType.Sticker => await whatsApp.SendStickerAsync(phoneNumber, mediaId!, ct),
+            MessageType.Reaction => await whatsApp.SendStickerAsync(phoneNumber, mediaId!, ct),
+            _ => throw new NotSupportedException($"Message type {request.Type} not supported for outgoing.")
         };
 
-        message.SetWhatsAppId(waMessageId);
+        message.SetWhatsAppId(waMessageId, mediaId, mediaUrl);
         message.UpdateStatus(MessageStatus.Sent);
         await messageRepo.UpdateAsync(message, ct);
         await messageRepo.SaveChangesAsync(ct);

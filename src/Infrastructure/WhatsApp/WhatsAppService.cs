@@ -2,6 +2,7 @@ using System;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Application.Interfaces;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.WhatsApp;
@@ -11,19 +12,18 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
     private readonly string _messagesUrl =
         $"https://graph.facebook.com/v19.0/{opts.Value.PhoneNumberId}/messages";
 
-    private readonly Func<string, string> _mediaUrl = mediaId 
+    private readonly string _uploadMediaUrl =
+        $"https://graph.facebook.com/v19.0/{opts.Value.PhoneNumberId}/media";
+
+    private readonly Func<string, string> _getMediaUrl = mediaId 
         => $"https://graph.facebook.com/v19.0/{mediaId}?phone_number_id={opts.Value.PhoneNumberId}";
 
     public async Task<string> GetMediaUrl(string mediaId, CancellationToken ct = default)
     {
-        var url = _mediaUrl(mediaId);
+        var url = _getMediaUrl(mediaId);
         var meta = await http.GetFromJsonAsync<JsonElement>(url, ct);
         var downloadUrl = meta.GetProperty("url").GetString()!;
         return downloadUrl;
-
-        // var bytes = await http.GetByteArrayAsync(downloadUrl, ct);
-
-        // return Convert.ToBase64String(bytes);
     }
 
     public Task MarkAsReadAsync(string whatsAppMessageId, CancellationToken ct = default)
@@ -34,31 +34,31 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
             message_id = whatsAppMessageId
         }, ct);
 
-    public Task<string> SendAudioAsync(string to, string audioUrl, CancellationToken ct = default)
+    public Task<string> SendAudioAsync(string to, string audioId, CancellationToken ct = default)
         => PostAsync(new
         {
             messaging_product = "whatsapp",
             to,
             type = "audio",
-            audio = new { link = audioUrl }
+            audio = new { id = audioId, voice = true }
         }, ct);
 
-    public Task<string> SendDocumentAsync(string to, string documentUrl, string fileName, CancellationToken ct = default)
+    public Task<string> SendDocumentAsync(string to, string documentId, string fileName, CancellationToken ct = default)
         => PostAsync(new
         {
             messaging_product = "whatsapp",
             to,
             type = "document",
-            document = new { link = documentUrl , fileName }
+            document = new { id = documentId , fileName }
         }, ct);
 
-    public Task<string> SendImageAsync(string to, string imageUrl, string? caption = null, CancellationToken ct = default)
+    public Task<string> SendImageAsync(string to, string imageId, string? caption = null, CancellationToken ct = default)
         => PostAsync(new
         {
             messaging_product = "whatsapp",
             to,
             type = "image",
-            image = new { link = imageUrl, caption }
+            image = new { id = imageId, caption }
         }, ct);
 
     public Task SendReactionAsync(string to, string whatsAppMessageId, string emoji, CancellationToken ct = default)
@@ -70,6 +70,15 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
             reaction = new { message_id = whatsAppMessageId, emoji }
         }, ct);
 
+    public Task<string> SendStickerAsync(string to, string stickerId, CancellationToken ct = default)
+        => PostAsync(new
+        {
+            messaging_product = "whatsapp",
+            to,
+            type = "sticker",
+            sticker = new { id = stickerId }
+        }, ct);
+
     public Task<string> SendTextAsync(string to, string text, CancellationToken ct = default)
         => PostAsync(new
         {
@@ -79,6 +88,38 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
             text = new { body = text }
         }, ct);
 
+    public Task<string> SendVideoAsync(string to, string videoId, CancellationToken ct = default)
+        => PostAsync(new
+        {
+            messaging_product = "whatsapp",
+            to,
+            type = "video",
+            video = new { id = videoId }
+        }, ct);
+
+    public async Task<string> UploadMedia(Stream stream, string fileName, CancellationToken ct = default)
+    {
+        var provider = new FileExtensionContentTypeProvider();
+        if (!provider.TryGetContentType(fileName, out var contentType))
+            contentType = "application/octet-stream";
+
+        using var form = new MultipartFormDataContent();
+
+        var fileContent = new StreamContent(stream);
+
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+
+        form.Add(fileContent, "file", Path.GetFileName(fileName));
+        form.Add(new StringContent("whatsapp"), "messaging_product");
+
+        var response = await http.PostAsync(_uploadMediaUrl, form, ct);
+        response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
+
+        return body.GetProperty("id").GetString()!;
+    }
+
     private async Task<string> PostAsync(object payload, CancellationToken ct = default)
     {
         var response = await http.PostAsJsonAsync(_messagesUrl, payload, ct);
@@ -86,4 +127,5 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
         return body.GetProperty("messages")[0].GetProperty("id").GetString()!;
     }
+    
 }
