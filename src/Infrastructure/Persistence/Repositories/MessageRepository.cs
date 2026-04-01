@@ -1,6 +1,7 @@
 using System;
 using Application.Interfaces;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
@@ -29,6 +30,18 @@ public class MessageRepository(AppDbContext db) : IMessageRepository
         => db.Messages
             .Include(m => m.Reactions)
             .FirstOrDefaultAsync(m => m.WhatsAppMessageId == whatsAppMessageId, ct);
+
+    public async Task RemoveReactionAsync(Guid messageId, string fromPhoneNumber, CancellationToken ct = default)
+    {
+        var reactions = await db.Reactions
+            .Where(r => r.MessageId == messageId &&
+                r.FromPhoneNumber == fromPhoneNumber &&
+                !r.IsFromAgent)
+            .ToListAsync(ct);
+
+        if (reactions.Count != 0)
+            db.Reactions.RemoveRange(reactions);
+    }
 
     public Task SaveChangesAsync(CancellationToken ct = default)
         => db.SaveChangesAsync(ct);

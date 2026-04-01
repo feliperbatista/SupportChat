@@ -77,6 +77,12 @@ public class ProcessWebhookCommandHandler(
             var fromPhone = msg.GetProperty("from").GetString()!;
             var typeStr = msg.GetProperty("type").GetString()!;
 
+            var alreadyExists = await messageRepo.GetByWhatsAppIdAsync(waMessageId, ct);
+            if (alreadyExists is not null)
+            {
+                continue;
+            }
+
             var contact = await contactRepo.GetByPhoneAsync(fromPhone, ct);
             if (contact is null)
             {
@@ -128,6 +134,14 @@ public class ProcessWebhookCommandHandler(
 
         var targetMessage = await messageRepo.GetByWhatsAppIdAsync(waMessageId, ct);
         if (targetMessage is null) return;
+
+        if (string.IsNullOrEmpty(emoji))
+        {
+            await messageRepo.RemoveReactionAsync(targetMessage.Id, from, ct);
+            await messageRepo.SaveChangesAsync(ct);
+
+            await notifications.NotifyReactionRemovedAsync(conversation.Id, targetMessage.Id, from, ct);
+        }
 
         var reaction = Reaction.Create(targetMessage.Id, emoji, from, false);
         await messageRepo.AddReactionAsync(reaction, ct);
