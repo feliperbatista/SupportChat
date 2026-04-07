@@ -45,11 +45,26 @@ builder.Services
         {
             OnMessageReceived = context =>
             {
-                var token = context.Request.Query["access_token"];
+                if (context.Request.Cookies.TryGetValue("auth_token", out var cookieToken)
+                    && !string.IsNullOrEmpty(cookieToken))
+                {
+                    context.Token = cookieToken;
+                    return Task.CompletedTask;
+                }
+
+                var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
+                if (authHeader?.StartsWith("Bearer") == true)
+                {
+                    context.Token = authHeader["Bearer ".Length..];
+                    return Task.CompletedTask;
+                }
+
+                var queryToken = context.Request.Query["access_token"];
                 var path  = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(token) &&
+                if (!string.IsNullOrEmpty(queryToken) &&
                     path.StartsWithSegments("/hubs/chat"))
-                    context.Token = token;
+                    context.Token = queryToken;
+                    
                 return Task.CompletedTask;
             }
         };
@@ -65,7 +80,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy
             .WithOrigins(
-                builder.Configuration["Frontend:Url"] ?? "http://localhost:5173")
+                builder.Configuration["Frontend:Url"] ?? "http://localhost:3000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()));
