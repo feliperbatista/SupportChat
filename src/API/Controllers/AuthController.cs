@@ -52,14 +52,15 @@ public class AuthController(ISender mediator) : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("signalr-token")]
     public IActionResult GetSignalRToken()
     {
-        var agentId = User.FindFirst("sub")?.Value;
+        var agentId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (agentId is null) return Unauthorized();
 
         if (Request.Cookies.TryGetValue("auth_token", out var token))
             return Ok(new { token });
-            
+
         return Unauthorized();
     }
 
