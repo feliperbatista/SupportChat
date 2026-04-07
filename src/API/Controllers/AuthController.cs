@@ -1,6 +1,7 @@
 using Application.Features.Agents.Commands;
 using Application.Features.Auth.Commands;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,6 +49,18 @@ public class AuthController(ISender mediator) : ControllerBase
         var result = await mediator.Send(
             new CreateAgentCommand(request.Name, request.Email, request.Password), ct);
         return Created(string.Empty, result);
+    }
+
+    [Authorize]
+    public IActionResult GetSignalRToken()
+    {
+        var agentId = User.FindFirst("sub")?.Value;
+        if (agentId is null) return Unauthorized();
+
+        if (Request.Cookies.TryGetValue("auth_token", out var token))
+            return Ok(new { token });
+            
+        return Unauthorized();
     }
 
     public record LoginRequest(string Email, string Password);
