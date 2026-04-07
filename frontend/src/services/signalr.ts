@@ -6,8 +6,16 @@ export function getConnection(): signalR.HubConnection {
   if (!connection) {
     connection = new signalR.HubConnectionBuilder()
       .withUrl(process.env.NEXT_PUBLIC_HUB_URL!, {
-        accessTokenFactory: () => {
-          return localStorage.getItem('token') ?? '';
+        accessTokenFactory: async () => {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signalr-token`,
+            {
+              credentials: 'include',
+            },
+          );
+          if (!res.ok) return '';
+          const data = await res.json();
+          return data.token;
         },
       })
       .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])

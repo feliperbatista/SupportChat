@@ -3,9 +3,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface AuthState {
-  token: string | null;
   agent: Agent | null;
-  setAuth: (token: string, agent: Agent) => void;
+  setAuth: (agent: Agent) => void;
   clearAuth: () => void;
   isAuthenticated: () => boolean;
 }
@@ -16,17 +15,15 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       agent: null,
 
-      setAuth: (token, agent) => {
-        localStorage.setItem('token', token);
-        set({ token, agent });
+      setAuth: (agent) => {
+        set({ agent });
       },
 
       clearAuth: () => {
-        localStorage.removeItem('token');
-        set({ token: null, agent: null });
+        set({ agent: null });
       },
 
-      isAuthenticated: () => !!get().token,
+      isAuthenticated: () => !!get().agent,
     }),
     { name: 'auth-storage' },
   ),
