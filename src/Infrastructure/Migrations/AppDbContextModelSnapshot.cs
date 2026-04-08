@@ -259,6 +259,8 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CreatedAt");
 
+                    b.HasIndex("SentByAgentId");
+
                     b.HasIndex("WhatsAppMessageId")
                         .IsUnique()
                         .HasFilter("[WhatsAppMessageId] IS NOT NULL");
@@ -359,7 +361,13 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.Agent", "SentByAgent")
+                        .WithMany()
+                        .HasForeignKey("SentByAgentId");
+
                     b.Navigation("Conversation");
+
+                    b.Navigation("SentByAgent");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reaction", b =>

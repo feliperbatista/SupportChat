@@ -17,7 +17,7 @@ public static class MappingExtensions
         m.MediaUrl,
         m.IsFromAgent,
         m.SentByAgentId,
-        null,
+        m.SentByAgent?.Name,
         m.QuotedMessageId,
         m.CreatedAt,
         m.Reactions.Select(r => r.ToDto())

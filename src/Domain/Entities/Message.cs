@@ -18,6 +18,7 @@ public class Message
     public string? MediaId { get; private set; }
     public bool IsFromAgent { get; private set; }
     public Guid? SentByAgentId { get; private set; }
+    public Agent? SentByAgent { get; private set; }
     public string? QuotedMessageId { get; private set; }
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 

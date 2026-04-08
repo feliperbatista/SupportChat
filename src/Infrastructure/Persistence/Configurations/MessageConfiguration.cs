@@ -43,6 +43,10 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .HasForeignKey(r => r.MessageId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(m => m.SentByAgent)
+            .WithMany()
+            .HasForeignKey(m => m.SentByAgentId);
+
         builder.HasIndex(m => m.ConversationId);
         builder.HasIndex(m => m.CreatedAt);
     }
