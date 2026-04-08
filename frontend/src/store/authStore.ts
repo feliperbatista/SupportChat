@@ -1,29 +1,26 @@
-import { Agent } from '@/types';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { Agent } from "@/types";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface AuthState {
   agent: Agent | null;
-  setAuth: (agent: Agent) => void;
+  isAuthenticated: boolean;
+
+  setAgent: (agent: Agent) => void;
   clearAuth: () => void;
-  isAuthenticated: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
-      token: null,
+    (set) => ({
       agent: null,
+      isAuthenticated: false,
 
-      setAuth: (agent) => {
-        set({ agent });
-      },
+      setAgent: (agent) =>
+        set({ agent, isAuthenticated: true }),
 
-      clearAuth: () => {
-        set({ agent: null });
-      },
-
-      isAuthenticated: () => !!get().agent,
+      clearAuth: () =>
+        set({ agent: null, isAuthenticated: false }),
     }),
     { name: 'auth-storage' },
   ),

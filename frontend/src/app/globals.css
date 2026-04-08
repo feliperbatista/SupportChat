@@ -1,11 +1,5 @@
-@import 'tailwindcss/preflight';
-@tailwind utilities;
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@config "../../tailwind.config.ts";
+@import "tailwindcss";
 
 html,
 body {

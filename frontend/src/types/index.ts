@@ -42,7 +42,7 @@ export interface Message {
   sentByAgentId?: string;
   sentByAgentName?: string;
   quotedMessageId?: string;
-  createdAt: Date;
+  createdAt: string;
   reactions: Reaction[];
 }
 
@@ -52,8 +52,8 @@ export interface Conversation {
   assignedAgent?: Agent;
   status: 'Open' | 'Pending' | 'Resolved' | 'Closed';
   isInQueue: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   lastMessage?: Message;
 }
 

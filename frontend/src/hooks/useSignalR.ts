@@ -18,9 +18,12 @@ export function useSignalR() {
   useEffect(() => {
     const conn = getConnection();
 
-    startConnection();
+    startConnection().catch((err) =>
+      console.error('[SignalR] Failed to connect:', err),
+    );
 
     conn.on('NewMessage', (message: Message) => {
+      console.log('[SignalR] NewMessage received:', message);
       addMessageToConversation(message);
     });
 

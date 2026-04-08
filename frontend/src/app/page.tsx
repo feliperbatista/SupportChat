@@ -1,5 +1,21 @@
+'use client';
+
+import ChatLayout from '@/components/ChatLayout';
+import { useAuthStore } from '@/store/authStore';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 export default function Home() {
-  return (
-    <p>Hello world</p>
-  );
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) return null;
+
+  return <ChatLayout />;
 }
