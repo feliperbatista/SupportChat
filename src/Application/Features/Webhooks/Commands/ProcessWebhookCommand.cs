@@ -114,17 +114,14 @@ public class ProcessWebhookCommandHandler(
 
             await messageRepo.AddAsync(domainMessage, ct);
             await messageRepo.SaveChangesAsync(ct);
-
-            await whatsApp.MarkAsReadAsync(waMessageId, ct);
-
             var dto = domainMessage.ToDto();
-            Console.WriteLine($"[Webhook] New incoming message dto: {dto.Id} conv={dto.ConversationId} type={dto.Type}");
 
             await notifications.NotifyNewMessageAsync(conversation.Id, conversation.AssignedAgentId, dto, ct);
 
-            Console.WriteLine($"[Webhook] NotifyNewMessageAsync sent for conv-{conversation.Id}");  
             if (conversation.IsInQueue())
                 await notifications.NotifyConversationQueuedAsync(conversation.ToDto(), ct);
+           
+            await whatsApp.MarkAsReadAsync(waMessageId, ct);
         }
     }
 
