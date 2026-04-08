@@ -17,6 +17,7 @@ public class MessageRepository(AppDbContext db) : IMessageRepository
     public async Task<IEnumerable<Message>> GetByConversationIdAsync(Guid conversationId, CancellationToken ct = default)
         => await db.Messages
             .Include(m => m.Reactions)
+            .Include(m => m.SentByAgent)
             .Where(m => m.ConversationId == conversationId)
             .OrderBy(m => m.CreatedAt)
             .ToListAsync(ct);

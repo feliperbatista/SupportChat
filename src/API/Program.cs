@@ -8,6 +8,7 @@ using FluentValidation;
 using Infrastructure;
 using Infrastructure.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,6 +76,7 @@ builder.Services.AddAuthorizationBuilder()
         policy.RequireRole("Admin"));
 
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, SubClaimUserIdProvider>();
 
 builder.Services.AddCors(options => 
     options.AddDefaultPolicy(policy =>
