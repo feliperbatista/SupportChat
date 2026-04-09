@@ -18,12 +18,7 @@ export function useSignalR() {
   useEffect(() => {
     const conn = getConnection();
 
-    startConnection().catch((err) =>
-      console.error('[SignalR] Failed to connect:', err),
-    );
-
     conn.on('NewMessage', (message: Message) => {
-      console.log('[SignalR] NewMessage received:', message);
       addMessageToConversation(message);
     });
 
@@ -71,6 +66,10 @@ export function useSignalR() {
       ({ conversationId }: { conversationId: string }) => {
         moveToMine(conversationId);
       },
+    );
+
+    startConnection().catch((err) =>
+      console.error('[SignalR] Failed to connect:', err),
     );
 
     return () => {
