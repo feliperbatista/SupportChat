@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
@@ -27,6 +27,12 @@ export default function ConversationList() {
     (c) =>
       c.contact.name.toLowerCase().includes(search.toLowerCase()) ||
       c.contact.phoneNumber.includes(search),
+  );
+
+  const sorted = filtered.sort(
+    (a, b) =>
+      (new Date(b.lastMessage?.createdAt || 0).getTime() || 0) -
+      (new Date(a.lastMessage?.createdAt || 0).getTime() || 0),
   );
 
   async function handleLogout() {
@@ -92,7 +98,7 @@ export default function ConversationList() {
       </div>
 
       <div className='flex-1 overflow-y-auto'>
-        {filtered.length === 0 ? (
+        {sorted.length === 0 ? (
           <div className='flex flex-col items-center justify-center h-32 text-wa-muted text-sm'>
             {search
               ? 'No results found'
@@ -101,7 +107,7 @@ export default function ConversationList() {
                 : 'Queue is empty'}
           </div>
         ) : (
-          filtered.map((conv) => (
+          sorted.map((conv) => (
             <ConversationItem
               key={conv.id}
               conversation={conv}
