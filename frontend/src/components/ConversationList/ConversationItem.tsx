@@ -47,7 +47,7 @@ export default function ConversationItem({ conversation, isQueue }: Props) {
 
     if (isQueue) {
       try {
-        await api.post(`/api/conversation/${conversation.id}/assign`);
+        await api.patch(`/api/conversation/${conversation.id}/assign`);
         moveToMine(conversation.id);
       } catch (err) {
         console.error('Failed to assign conversation', err);
