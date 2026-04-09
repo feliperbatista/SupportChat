@@ -7,7 +7,8 @@ import { useEffect } from 'react';
 
 export default function Home() {
   const router = useRouter();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const agent = useAuthStore((s) => s.agent);
+  const isAuthenticated = !!agent 
 
   useEffect(() => {
     if (!isAuthenticated) {
