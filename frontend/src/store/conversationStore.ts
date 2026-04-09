@@ -45,7 +45,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
     set((state) => {
       const existing = state.messages[message.conversationId] ?? [];
 
-      if (existing.find((m) => m.id === message.id)) return state;
+      if (existing.some((m) => m.id === message.id)) return state;
 
       const optimisticIndex = existing.findIndex(
         (m) =>
