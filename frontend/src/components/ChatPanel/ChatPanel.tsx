@@ -113,7 +113,7 @@ export default function ChatPanel({ conversationId }: Props) {
             </div>
           ))
         )}
-        <div ref={bottomRef}></div>
+        <div ref={bottomRef} />
       </div>
 
       <div className='shrink-0'>
