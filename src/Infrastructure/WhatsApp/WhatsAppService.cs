@@ -99,13 +99,22 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
 
     public async Task<string> UploadMedia(Stream stream, string fileName, CancellationToken ct = default)
     {
-        var provider = new FileExtensionContentTypeProvider();
-        if (!provider.TryGetContentType(fileName, out var contentType))
-            contentType = "application/octet-stream";
-
         using var form = new MultipartFormDataContent();
 
         var fileContent = new StreamContent(stream);
+
+        string? contentType;
+
+        if (fileName.EndsWith(".ogg"))
+        {
+            contentType = "audio/ogg; codecs=opus";
+        }
+        else
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(fileName, out contentType))
+                contentType = "application/octet-stream";
+        }
 
         fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
 
@@ -113,8 +122,11 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
         form.Add(new StringContent("whatsapp"), "messaging_product");
 
         var response = await http.PostAsync(_uploadMediaUrl, form, ct);
-        response.EnsureSuccessStatusCode();
-
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseBody = await response.Content.ReadAsStringAsync(ct);
+            throw new Exception($"WhatsApp error: {response.StatusCode} - {responseBody}");
+        }
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
 
         return body.GetProperty("id").GetString()!;
