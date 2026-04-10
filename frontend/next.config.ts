@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'lookaside.fbsbx.com'
+        hostname: 'csstoragefelipe.blob.core.windows.net'
       }
     ]
   }
