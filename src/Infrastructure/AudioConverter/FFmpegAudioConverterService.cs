@@ -7,7 +7,12 @@ namespace Infrastructure.AudioConverter;
 
 public class FFmpegAudioConverterService(IConfiguration configuration) : IAudioConverter
 {
-    private readonly string _ffmpegPath = configuration["FfmpegPath"] ?? @"C:\home\site\ffmpeg\ffmpeg.exe";
+    private readonly string _ffmpegPath = configuration["FfmpegPath"] 
+    ?? Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "ffmpeg",
+        "ffmpeg.exe"
+    );
     public async Task<Stream> ConvertWebMToOggAsync(Stream input, CancellationToken ct = default)
     {
         var tempInput = Path.GetTempFileName() + ".webm";
