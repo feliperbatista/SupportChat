@@ -2,7 +2,7 @@
 
 import api from '@/services/api';
 import { Send, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Props {
   conversationId: string;
@@ -21,6 +21,36 @@ export default function AudioRecorder({
   const chunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const startRecording = useCallback(async () => {
+    {
+      try {
+        const mimeType = 'audio/webm; codecs=opus';
+
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          console.error('WebM/OGG not supported by this browser');
+          onCancel();
+          return;
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        const recorder = new MediaRecorder(stream, {
+          mimeType: mimeType,
+        });
+        mediaRef.current = recorder;
+        chunksRef.current = [];
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunksRef.current.push(e.data);
+        };
+        recorder.start();
+      } catch (err) {
+        console.error('Microphone access denied', err);
+        onCancel();
+      }
+    }
+  }, [onCancel]);
+
   useEffect(() => {
     startRecording();
     intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
@@ -28,45 +58,29 @@ export default function AudioRecorder({
       stopRecording();
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  });
+  }, [startRecording]);
 
-  async function startRecording() {
-    try {
-      const mimeType = 'audio/webm; codecs=opus';
+  function stopRecording(): Promise<Blob | null> {
+    return new Promise((resolve) => {
+      const recorder = mediaRef.current;
+      if (!recorder) return resolve(null);
 
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        console.error('WebM/OGG not supported by this browser');
-        onCancel();
-        return;
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, {
-        mimeType: mimeType,
-      });
-      mediaRef.current = recorder;
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, {
+          type: 'audio/webm; codecs=opus',
+        });
+        resolve(blob);
       };
-      recorder.start();
-    } catch (err) {
-      console.error('Microphone access denied', err);
-      onCancel();
-    }
-  }
 
-  function stopRecording(): Blob | null {
-    const recorder = mediaRef.current;
-    if (!recorder) return null;
-    recorder.stop();
-    recorder.stream.getTracks().forEach((t) => t.stop());
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    return new Blob(chunksRef.current, { type: 'audio/webm; codecs=opus' });
+      recorder.stop();
+      recorder.stream.getTracks().forEach((t) => t.stop());
+
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    });
   }
 
   async function handleSend() {
-    const blob = stopRecording();
+    const blob = await stopRecording();
     if (!blob) return;
     setSending(true);
 
