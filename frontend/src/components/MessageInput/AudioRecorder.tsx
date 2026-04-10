@@ -32,11 +32,23 @@ export default function AudioRecorder({
 
   async function startRecording() {
     try {
+      const mimeType = 'audio/webm; codecs=opus';
+
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        console.error('WebM/OGG not supported by this browser');
+        onCancel();
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream, {
+        mimeType: mimeType,
+      });
       mediaRef.current = recorder;
       chunksRef.current = [];
-      recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
       recorder.start();
     } catch (err) {
       console.error('Microphone access denied', err);
@@ -50,7 +62,7 @@ export default function AudioRecorder({
     recorder.stop();
     recorder.stream.getTracks().forEach((t) => t.stop());
     if (intervalRef.current) clearInterval(intervalRef.current);
-    return new Blob(chunksRef.current, { type: 'audio/webm' });
+    return new Blob(chunksRef.current, { type: 'audio/webm; codecs=opus' });
   }
 
   async function handleSend() {
@@ -61,13 +73,12 @@ export default function AudioRecorder({
     try {
       const formData = new FormData();
       formData.append('file', blob, 'audio.webm');
-      formData.append('conversationId', conversationId);
+      formData.append('content', 'Audio');
+      formData.append('type', 'Audio');
 
-      await api.post(
-        `/api/conversation/${conversationId}/messages/audio`,
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } },
-      );
+      await api.post(`/api/conversation/${conversationId}/messages`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       onSent();
     } catch (err) {
       console.error('Failed to send audio', err);

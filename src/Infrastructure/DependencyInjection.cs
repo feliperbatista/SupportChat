@@ -1,5 +1,6 @@
 using System;
 using Application.Interfaces;
+using Infrastructure.AudioConverter;
 using Infrastructure.Auth;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
@@ -27,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IConversationCategoryRepository, ConversationCategoryRepository>();
+        services.AddSingleton<IAudioConverter, FFmpegAudioConverterService>();
 
         services.Configure<WhatsAppOptions>(config.GetSection("WhatsApp"));
         services.AddHttpClient<IWhatsAppService, WhatsAppService>(client =>

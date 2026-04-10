@@ -21,7 +21,8 @@ public class SendMessageCommandHandler(
     IConversationRepository conversationRepo,
     IMessageRepository messageRepo,
     IWhatsAppService whatsApp,
-    INotificationService notifications
+    INotificationService notifications,
+    IAudioConverter audioConverter
 ) : IRequestHandler<SendMessageCommand, MessageDto>
 {
     public async Task<MessageDto> Handle(SendMessageCommand request, CancellationToken ct)
@@ -49,7 +50,16 @@ public class SendMessageCommandHandler(
 
         if (request.FileStream is not null)
         {
-            mediaId = await whatsApp.UploadMedia(request.FileStream, request.FileName!, ct);
+            Stream fileToUpload = request.FileStream;
+            string fileName = request.FileName!;
+
+            if (request.Type == MessageType.Audio)
+            {
+                fileToUpload = await audioConverter.ConvertWebMToOggAsync(request.FileStream, ct);
+                fileName = Path.ChangeExtension(fileName, ".ogg");
+            }
+
+            mediaId = await whatsApp.UploadMedia(fileToUpload, fileName, ct);
             mediaUrl = await whatsApp.GetMediaUrl(mediaId, ct);
         }
 
