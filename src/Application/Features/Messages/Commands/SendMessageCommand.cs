@@ -22,7 +22,8 @@ public class SendMessageCommandHandler(
     IMessageRepository messageRepo,
     IWhatsAppService whatsApp,
     INotificationService notifications,
-    IAudioConverter audioConverter
+    IAudioConverter audioConverter,
+    IAzureBlobService azureBlob
 ) : IRequestHandler<SendMessageCommand, MessageDto>
 {
     public async Task<MessageDto> Handle(SendMessageCommand request, CancellationToken ct)
@@ -50,17 +51,34 @@ public class SendMessageCommandHandler(
 
         if (request.FileStream is not null)
         {
-            Stream fileToUpload = request.FileStream;
+            using var originalStream = new MemoryStream();
+            await request.FileStream.CopyToAsync(originalStream, ct);
+            originalStream.Position = 0;
+
+            Stream fileToUpload = originalStream;
             string fileName = request.FileName!;
 
             if (request.Type == MessageType.Audio)
             {
-                fileToUpload = await audioConverter.ConvertWebMToOggAsync(request.FileStream, ct);
+                fileToUpload = await audioConverter.ConvertWebMToOggAsync(originalStream, ct);
                 fileName = Path.ChangeExtension(fileName, ".ogg");
             }
 
-            mediaId = await whatsApp.UploadMedia(fileToUpload, fileName, ct);
-            mediaUrl = await whatsApp.GetMediaUrl(mediaId, ct);
+            using var waStream = new MemoryStream();
+            await fileToUpload.CopyToAsync(waStream, ct);
+            waStream.Position = 0;
+
+            using var blobStream = new MemoryStream();
+            fileToUpload.Position = 0;
+            await fileToUpload.CopyToAsync(blobStream, ct);
+            blobStream.Position = 0;
+
+            mediaId = await whatsApp.UploadMedia(waStream, fileName, ct);
+
+            if (fileToUpload.CanSeek)
+                fileToUpload.Position = 0;
+
+            mediaUrl = await azureBlob.UploadBlob(blobStream, fileName, ct);
         }
 
         var waMessageId = request.Type switch

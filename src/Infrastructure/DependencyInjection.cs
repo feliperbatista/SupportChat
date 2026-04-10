@@ -34,6 +34,7 @@ public static class DependencyInjection
 
         services.AddSingleton<IAudioConverter, FFmpegAudioConverterService>();
         
+        services.AddScoped<IAzureBlobService, AzureBlobService>();
         services.Configure<AzureBlobOptions>(
             config.GetSection("AzureBlob")
         );

@@ -18,14 +18,6 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
     private readonly Func<string, string> _getMediaUrl = mediaId 
         => $"https://graph.facebook.com/v19.0/{mediaId}?phone_number_id={opts.Value.PhoneNumberId}";
 
-    public async Task<string> GetMediaUrl(string mediaId, CancellationToken ct = default)
-    {
-        var url = _getMediaUrl(mediaId);
-        var meta = await http.GetFromJsonAsync<JsonElement>(url, ct);
-        var downloadUrl = meta.GetProperty("url").GetString()!;
-        return downloadUrl;
-    }
-
     public Task MarkAsReadAsync(string whatsAppMessageId, CancellationToken ct = default)
         => PostAsync(new
         {
@@ -139,4 +131,39 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
         return body.GetProperty("messages")[0].GetProperty("id").GetString()!;
     }
     
+    
+
+    public async Task<(Stream stream, string fileName, string mimeType)> DownloadMediaAsync(string mediaId, CancellationToken ct = default)
+    {
+        var url = _getMediaUrl(mediaId);
+        var meta = await http.GetFromJsonAsync<JsonElement>(url, ct);
+        var downloadUrl = meta.GetProperty("url").GetString()!;
+
+        var response = await http.GetAsync(downloadUrl, ct);
+        response.EnsureSuccessStatusCode();
+
+        var stream = await response.Content.ReadAsStreamAsync(ct);
+
+        var mimeType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+
+        var extension = GetExtensionFromMime(mimeType);
+
+        var fileName = $"{Guid.NewGuid()}{extension}";
+
+        return (stream, fileName, mimeType);
+    }
+
+    private static string GetExtensionFromMime(string mimeType)
+    {
+        return mimeType switch
+        {
+            "audio/ogg" => ".ogg",
+            "audio/mpeg" => ".mp3",
+            "audio/aac" => ".aac",
+            "image/jpeg" => ".jpg",
+            "image/png" => ".png",
+            "video/mp4" => ".mp4",
+            _ => ""
+        };
+    }
 }

@@ -16,7 +16,8 @@ public class ProcessWebhookCommandHandler(
     IConversationRepository conversationRepo,
     IMessageRepository messageRepo,
     IWhatsAppService whatsApp,
-    INotificationService notifications
+    INotificationService notifications,
+    IAzureBlobService azureBlob
 ) : IRequestHandler<ProcessWebhookCommand>
 {
     public async Task Handle(ProcessWebhookCommand request, CancellationToken ct)
@@ -101,7 +102,20 @@ public class ProcessWebhookCommandHandler(
             }
 
             var (content, mediaId, mimeType) = ParseMessageContent(msg, typeStr);
-            var mediaUrl = string.IsNullOrEmpty(mediaId) ? null : await whatsApp.GetMediaUrl(mediaId, ct);
+
+            string? mediaUrl = null;
+
+            if (!string.IsNullOrEmpty(mediaId))
+            {
+                var (stream, fileName, mimeTypeFromWa) = await whatsApp.DownloadMediaAsync(mediaId, ct);
+                
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream, ct);
+                memoryStream.Position = 0;
+                
+                mediaUrl = await azureBlob.UploadBlob(stream, fileName, ct);
+            }
+
             var messageType = ParseMessageType(typeStr);
 
             if (messageType == MessageType.Reaction)

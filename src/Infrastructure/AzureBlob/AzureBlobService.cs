@@ -2,6 +2,7 @@ using System;
 using Application.Interfaces;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -19,7 +20,7 @@ public class AzureBlobService : IAzureBlobService
         _container.CreateIfNotExists(Azure.Storage.Blobs.Models.PublicAccessType.Blob);
     }
 
-    public async Task<string> UploadBlob(Stream fileStream, string fileName, string contentType, CancellationToken ct = default)
+    public async Task<string> UploadBlob(Stream fileStream, string fileName, CancellationToken ct = default)
     {
         string extension = Path.GetExtension(fileName);
         string blobName = Guid.NewGuid() + extension;
@@ -28,9 +29,27 @@ public class AzureBlobService : IAzureBlobService
 
         await blobClient.UploadAsync(fileStream, new BlobHttpHeaders
         {
-            ContentType = contentType
+            ContentType = GetFileContentType(fileName)
         }, cancellationToken: ct);
 
         return blobClient.Uri.ToString();
+    }
+
+    private static string? GetFileContentType(string fileName)
+    {
+        string? contentType;
+
+        if (fileName.EndsWith(".ogg"))
+        {
+            contentType = "audio/ogg";
+        }
+        else
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(fileName, out contentType))
+                contentType = "application/octet-stream";
+        }
+
+        return contentType;
     }
 }
