@@ -53,6 +53,7 @@ public class ConversationController(ISender mediator) : ControllerBase
     }
 
     [HttpPost("{id:guid}/messages")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> SendMessage(Guid id, [FromForm] SendMessageRequest request, CancellationToken ct)
     {
         var result = await mediator.Send(new SendMessageCommand(id, AgentId, request.Content, request.Type, request.File?.OpenReadStream(), request.File?.FileName), ct);
