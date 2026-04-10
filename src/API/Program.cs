@@ -13,6 +13,14 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+FFMpegCore.GlobalFFOptions.Configure(options =>
+{
+    options.BinaryFolder = Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "ffmpeg"
+    );
+});
+
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddMediatR(cfg =>
