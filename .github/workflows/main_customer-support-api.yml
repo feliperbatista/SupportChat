@@ -62,4 +62,5 @@ jobs:
           app-name: 'customer-support-api'
           slot-name: 'Production'
           package: .
+          clear: true
           
