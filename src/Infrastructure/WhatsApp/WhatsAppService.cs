@@ -107,7 +107,7 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
 
         if (fileName.EndsWith(".ogg"))
         {
-            contentType = "audio/ogg; codecs=opus";
+            contentType = "audio/ogg";
         }
         else
         {
@@ -122,12 +122,11 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
         form.Add(new StringContent("whatsapp"), "messaging_product");
 
         var response = await http.PostAsync(_uploadMediaUrl, form, ct);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
         if (!response.IsSuccessStatusCode)
         {
-            var responseBody = await response.Content.ReadAsStringAsync(ct);
-            throw new Exception($"WhatsApp error: {response.StatusCode} - {responseBody}");
+            throw new Exception($"WhatsApp error: {response.StatusCode} - {body}");
         }
-        var body = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
 
         return body.GetProperty("id").GetString()!;
     }
