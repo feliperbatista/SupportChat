@@ -22,13 +22,13 @@ export default function ImageMessage({ message }: Props) {
 
   return (
     <>
-      <div className='flex flex-col gap-1'>
+      <div className='relative max-w-70 w-full'>
         <Image
           src={message.mediaUrl}
           alt='Image message'
           onClick={() => setLightbox(true)}
-          width={70}
-          height={70}
+          width={300}
+          height={300}
           className='max-w-70 max-h-80 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity'
         />
         {message.content && (
@@ -50,8 +50,8 @@ export default function ImageMessage({ message }: Props) {
           <Image
             src={message.mediaUrl}
             alt='Full size'
-            width={300}
-            height={300}
+            width={800}
+            height={800}
             className='max-w-full max-h-full object-contain rounded-lg'
             onClick={(e) => e.stopPropagation()}
           />
