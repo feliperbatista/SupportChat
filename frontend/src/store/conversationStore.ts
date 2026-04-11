@@ -25,6 +25,8 @@ interface ConversationState {
   addToQueue: (conversation: Conversation) => void;
   moveToMine: (conversationId: string) => void;
   removeFromQueue: (conversationId: string) => void;
+
+  updateContact: (contactId: string, name: string) => void;
 }
 
 export const useConversationStore = create<ConversationState>((set) => ({
@@ -162,4 +164,19 @@ export const useConversationStore = create<ConversationState>((set) => ({
     set((state) => ({
       queue: state.queue.filter((c) => c.id !== conversationId),
     })),
+
+  updateContact: (contactId, name) =>
+    set((state) => {
+      const updateContactList = (list: Conversation[]) =>
+        list.map((c) => {
+          if (c.contact.id !== contactId) return c;
+          if (c.contact.name === name) return c;
+          return { ...c, contact: { ...c.contact, name } };
+        });
+
+      return {
+        queue: updateContactList(state.queue),
+        myConversations: updateContactList(state.myConversations),
+      };
+    }),
 }));

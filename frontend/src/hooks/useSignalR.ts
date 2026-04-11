@@ -13,6 +13,7 @@ export function useSignalR() {
     removeReaction,
     addToQueue,
     moveToMine,
+    updateContact,
   } = useConversationStore();
 
   useEffect(() => {
@@ -68,6 +69,12 @@ export function useSignalR() {
       },
     );
 
+    conn.on(
+      'ContactUpdated',
+      ({ contactId, name }: { contactId: string; name: string }) =>
+        updateContact(contactId, name),
+    );
+
     startConnection().catch((err) =>
       console.error('[SignalR] Failed to connect:', err),
     );
@@ -87,6 +94,7 @@ export function useSignalR() {
     removeReaction,
     addToQueue,
     moveToMine,
+    updateContact
   ]);
 }
 

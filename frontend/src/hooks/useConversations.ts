@@ -15,6 +15,7 @@ export function useConversations() {
     setActiveConversation,
     removeFromQueue,
     messages,
+    updateContact,
   } = useConversationStore();
 
   const [loading, setLoading] = useState(false);
@@ -57,6 +58,17 @@ export function useConversations() {
     ],
   );
 
+  const updateContactName = useCallback(
+    async (contactId: string, name: string) => {
+      await api.patch(`/api/contact/${contactId}`, {
+        name: name,
+      });
+
+      updateContact(contactId, name);
+    },
+    [updateContact],
+  );
+
   useEffect(() => {
     refresh();
   }, [refresh]);
@@ -76,5 +88,6 @@ export function useConversations() {
     refresh,
     assignConversation,
     messages,
+    updateContactName
   };
 }
