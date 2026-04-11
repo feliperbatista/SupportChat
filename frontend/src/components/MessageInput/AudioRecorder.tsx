@@ -2,7 +2,7 @@
 
 import api from '@/services/api';
 import { Send, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
   conversationId: string;
@@ -20,23 +20,26 @@ export default function AudioRecorder({
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const startRecording = useCallback(async () => {
-    {
+  useEffect(() => {
+    let aborted = false;
+
+    const init = async () => {
       try {
-        const mimeType = 'audio/webm; codecs=opus';
-
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          console.error('WebM/OGG not supported by this browser');
-          onCancel();
-          return;
-        }
-
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
+
+        if (aborted) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+
+        streamRef.current = stream;
+
         const recorder = new MediaRecorder(stream, {
-          mimeType: mimeType,
+          mimeType: 'audio/webm; codecs=opus',
         });
         mediaRef.current = recorder;
         chunksRef.current = [];
@@ -45,36 +48,54 @@ export default function AudioRecorder({
         };
         recorder.start();
       } catch (err) {
-        console.error('Microphone access denied', err);
+        console.error('Mic error:', err);
         onCancel();
       }
-    }
+    };
+
+    init();
+    intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+
+    return () => {
+      aborted = true;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+
+      if (mediaRef.current && mediaRef.current.state !== 'inactive') {
+        mediaRef.current.stop();
+      }
+      stopTracks();
+    };
   }, [onCancel]);
 
-  useEffect(() => {
-    startRecording();
-    intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => {
-      stopRecording();
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [startRecording]);
+  function stopTracks() {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((s) => {
+      s.getTracks().forEach((t) => t.stop());
+    });
+  }
 
   function stopRecording(): Promise<Blob | null> {
     return new Promise((resolve) => {
       const recorder = mediaRef.current;
-      if (!recorder) return resolve(null);
 
-      recorder.onstop = () => {
+      if (!recorder || recorder.state === 'inactive') {
+        stopTracks();
+        return resolve(null);
+      }
+
+      recorder.onstop = async () => {
         const blob = new Blob(chunksRef.current, {
           type: 'audio/webm; codecs=opus',
         });
+        stopTracks();
         resolve(blob);
       };
 
       recorder.stop();
-      recorder.stream.getTracks().forEach((t) => t.stop());
-
       if (intervalRef.current) clearInterval(intervalRef.current);
     });
   }
@@ -93,6 +114,7 @@ export default function AudioRecorder({
       await api.post(`/api/conversation/${conversationId}/messages`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+      stopTracks();
       onSent();
     } catch (err) {
       console.error('Failed to send audio', err);
@@ -102,7 +124,10 @@ export default function AudioRecorder({
   }
 
   function handleCancel() {
-    stopRecording();
+    if (mediaRef.current && mediaRef.current.state !== 'inactive') {
+      mediaRef.current.stop();
+    }
+    stopTracks();
     onCancel();
   }
 
