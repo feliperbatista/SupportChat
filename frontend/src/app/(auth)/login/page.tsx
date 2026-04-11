@@ -6,6 +6,7 @@ import { MessageSquare, Loader2 } from 'lucide-react';
 import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import { Agent } from '@/types';
+import Input from '@/components/UI/Input';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,35 +51,20 @@ export default function LoginPage() {
 
         <div className='bg-wa-panel rounded-xl p-8 shadow-xl'>
           <form onSubmit={handleLogin} className='flex flex-col gap-5'>
-            <div className='flex flex-col gap-1.5'>
-              <label className='text-sm text-wa-muted'>Email</label>
-              <input
-                type='email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder='agent@company.com'
-                required
-                className='bg-wa-input text-wa-text rounded-lg px-4 py-3 text-sm
-                           outline-none border border-transparent
-                           focus:border-wa-teal transition-colors
-                           placeholder:text-wa-muted'
-              />
-            </div>
-
-            <div className='flex flex-col gap-1.5'>
-              <label className='text-sm text-wa-muted'>Password</label>
-              <input
-                type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder='••••••••'
-                required
-                className='bg-wa-input text-wa-text rounded-lg px-4 py-3 text-sm
-                           outline-none border border-transparent
-                           focus:border-wa-teal transition-colors
-                           placeholder:text-wa-muted'
-              />
-            </div>
+            <Input
+              type='email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder='agent@company.com'
+              required={true}
+            />
+            <Input
+              type='password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder='••••••••'
+              required={true}
+            />
 
             {error && (
               <div className='bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3'>
