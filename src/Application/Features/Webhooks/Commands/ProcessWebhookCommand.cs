@@ -113,7 +113,7 @@ public class ProcessWebhookCommandHandler(
                 await stream.CopyToAsync(memoryStream, ct);
                 memoryStream.Position = 0;
                 
-                mediaUrl = await azureBlob.UploadBlob(stream, fileName, ct);
+                mediaUrl = await azureBlob.UploadBlob(memoryStream, fileName, ct);
             }
 
             var messageType = ParseMessageType(typeStr);
