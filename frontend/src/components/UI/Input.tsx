@@ -1,15 +1,16 @@
 interface Props {
   type: string;
   value: string;
+  label: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   placeholder: string
   required: boolean
 }
 
-export default function Input({type, value, onChange, placeholder, required}: Props) {
+export default function Input({type, value, label, onChange, placeholder, required}: Props) {
   return (
     <div className='flex flex-col gap-1.5'>
-      <label className='text-sm text-wa-muted'>Email</label>
+      <label className='text-sm text-wa-muted'>{label}</label>
       <input
         type={type}
         value={value}
