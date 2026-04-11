@@ -131,8 +131,6 @@ public class WhatsAppService(HttpClient http, IOptions<WhatsAppOptions> opts) : 
         return body.GetProperty("messages")[0].GetProperty("id").GetString()!;
     }
     
-    
-
     public async Task<(Stream stream, string fileName, string mimeType)> DownloadMediaAsync(string mediaId, CancellationToken ct = default)
     {
         var url = _getMediaUrl(mediaId);
