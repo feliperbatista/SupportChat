@@ -10,7 +10,9 @@ public record UpdateContactNameCommand(Guid Id, string Name)
     : IRequest<ContactDto>;
 
 public class UpdateContactNameCommandHandler(
-    IContactRepository contactRepo) : IRequestHandler<UpdateContactNameCommand, ContactDto>
+    IContactRepository contactRepo,
+    INotificationService notificationService
+    ) : IRequestHandler<UpdateContactNameCommand, ContactDto>
 {
     public async Task<ContactDto> Handle(UpdateContactNameCommand request, CancellationToken ct)
     {
@@ -20,6 +22,8 @@ public class UpdateContactNameCommandHandler(
         contact.UpdateName(request.Name);
         await contactRepo.UpdateAsync(contact, ct);
         await contactRepo.SaveChangesAsync(ct);
+
+        await notificationService.NotifyContactNameUpdatedAsync(contact.Id, contact.Name, ct);
 
         return contact.ToDto();
     }

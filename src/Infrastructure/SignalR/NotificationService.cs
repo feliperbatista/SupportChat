@@ -48,4 +48,9 @@ public class NotificationService(IHubContext<ChatHub> hub) : INotificationServic
         => await hub.Clients
             .Group($"conv-{conversationId}")
             .SendAsync("ReactionRemoved", new { messageId, from }, ct);
+
+    public async Task NotifyContactNameUpdatedAsync(Guid contactId, string name, CancellationToken ct = default)
+        => await hub.Clients
+                .Group("inbox")
+                .SendAsync("ContactUpdated", new {id = contactId, name = name}, ct);
 }
