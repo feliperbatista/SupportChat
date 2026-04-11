@@ -6,9 +6,9 @@ import StatusTick from '@/components/UI/StatusTick';
 import ReactionPicker from './ReactionPicker';
 import AudioMessage from './AudioMessage';
 import ImageMessage from './ImageMessage';
-import { format } from 'date-fns';
 import { useAuthStore } from '@/store/authStore';
 import { useMessages } from '@/hooks/useMessages';
+import { formatBrazilTime } from '@/utils/date';
 
 interface Props {
   message: Message;
@@ -23,7 +23,7 @@ export default function MessageBubble({ message, conversationId }: Props) {
   const bubbleRef = useRef<HTMLDivElement>(null);
 
   const isOut = message.isFromAgent;
-  const time = format(new Date(message.createdAt), 'HH:mm');
+  const time = formatBrazilTime(message.createdAt);
 
   const reactionGroups = message.reactions.reduce<Record<string, number>>(
     (acc, r) => {
