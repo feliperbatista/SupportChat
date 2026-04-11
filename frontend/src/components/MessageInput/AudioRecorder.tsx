@@ -1,6 +1,6 @@
 'use client';
 
-import api from '@/services/api';
+import { useMessages } from '@/hooks/useMessages';
 import { Send, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -21,6 +21,7 @@ export default function AudioRecorder({
   const chunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const { sendMessage } = useMessages();
 
   useEffect(() => {
     let aborted = false;
@@ -106,14 +107,16 @@ export default function AudioRecorder({
     setSending(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', blob, 'audio.webm');
-      formData.append('content', 'Audio');
-      formData.append('type', 'Audio');
-
-      await api.post(`/api/conversation/${conversationId}/messages`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const file = new File([blob], 'audio.webm', {
+        type: 'audio/webm',
       });
+      await sendMessage({
+        conversationId: conversationId,
+        content: 'Audio',
+        type: 'Audio',
+        file: file,
+      });
+
       stopTracks();
       onSent();
     } catch (err) {

@@ -7,9 +7,10 @@ import { useState } from 'react';
 
 interface Props {
   message: Message;
+  isSticker: boolean
 }
 
-export default function ImageMessage({ message }: Props) {
+export default function ImageMessage({ message, isSticker }: Props) {
   const [lightbox, setLightbox] = useState(false);
 
   if (!message.mediaUrl) {
@@ -27,8 +28,8 @@ export default function ImageMessage({ message }: Props) {
           src={message.mediaUrl}
           alt='Image message'
           onClick={() => setLightbox(true)}
-          width={300}
-          height={300}
+          width={isSticker ? 150 : 300}
+          height={isSticker ? 150 : 300}
           className='max-w-70 max-h-80 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity'
         />
         {message.content && (

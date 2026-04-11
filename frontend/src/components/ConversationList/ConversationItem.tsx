@@ -1,11 +1,11 @@
 'use client';
 
 import { joinConversation, leaveConversation } from '@/hooks/useSignalR';
-import api from '@/services/api';
-import { useConversationStore } from '@/store/conversationStore';
-import { Conversation, Message } from '@/types';
+import { Conversation } from '@/types';
 import { format, isToday, isYesterday } from 'date-fns';
 import Avatar from '../UI/Avatar';
+import { useConversations } from '@/hooks/useConversations';
+import { useMessages } from '@/hooks/useMessages';
 
 interface Props {
   conversation: Conversation;
@@ -22,7 +22,6 @@ function formatTime(dateStr: string) {
 function getPreview(conv: Conversation) {
   const msg = conv.lastMessage;
   if (!msg) return 'No messages yet';
-  if (!msg) return 'No messages yet';
   if (msg.type === 'Image') return '🖼️ Image';
   if (msg.type === 'Audio') return '🎵 Audio message';
   if (msg.type === 'Video') return '📹 Video';
@@ -32,12 +31,9 @@ function getPreview(conv: Conversation) {
 }
 
 export default function ConversationItem({ conversation, isQueue }: Props) {
-  const {
-    activeConversationId,
-    setActiveConversation,
-    setMessages,
-    moveToMine,
-  } = useConversationStore();
+  const { assignConversation, activeConversationId, setActiveConversation } =
+    useConversations();
+  const { getMessages } = useMessages();
 
   const isActive = activeConversationId == conversation.id;
 
@@ -46,25 +42,12 @@ export default function ConversationItem({ conversation, isQueue }: Props) {
       await leaveConversation(activeConversationId);
 
     if (isQueue) {
-      try {
-        await api.patch(`/api/conversation/${conversation.id}/assign`);
-        moveToMine(conversation.id);
-      } catch (err) {
-        console.error('Failed to assign conversation', err);
-        return;
-      }
+      await assignConversation(conversation.id);
     }
 
     setActiveConversation(conversation.id);
 
-    try {
-      const { data } = await api.get<Message[]>(
-        `/api/conversation/${conversation.id}/messages`,
-      );
-      setMessages(conversation.id, data);
-    } catch (err) {
-      console.error('Failed to load messages', err);
-    }
+    await getMessages(conversation.id);
 
     await joinConversation(conversation.id);
   }

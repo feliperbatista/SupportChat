@@ -1,6 +1,5 @@
 'use client';
 
-import { useConversationStore } from '@/store/conversationStore';
 import { Message } from '@/types';
 import { format, isToday, isYesterday } from 'date-fns';
 import { useEffect, useRef, useState } from 'react';
@@ -9,6 +8,7 @@ import { MoreVertical, Search } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import MessageInput from '../MessageInput/MessageInput';
 import ContactSidebar from './ContactSidebar';
+import { useConversations } from '@/hooks/useConversations';
 
 interface Props {
   conversationId: string;
@@ -41,7 +41,7 @@ export default function ChatPanel({ conversationId }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const { myConversations, queue, messages } = useConversationStore();
+  const { myConversations, queue, messages } = useConversations();
 
   const conversation =
     myConversations.find((c) => c.id === conversationId) ||

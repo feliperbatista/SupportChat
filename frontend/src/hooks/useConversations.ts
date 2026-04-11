@@ -14,6 +14,7 @@ export function useConversations() {
     activeConversationId,
     setActiveConversation,
     removeFromQueue,
+    messages,
   } = useConversationStore();
 
   const [loading, setLoading] = useState(false);
@@ -74,5 +75,6 @@ export function useConversations() {
     setActiveConversation,
     refresh,
     assignConversation,
+    messages,
   };
 }

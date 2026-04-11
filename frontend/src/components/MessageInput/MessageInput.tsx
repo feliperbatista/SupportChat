@@ -1,12 +1,12 @@
 'use client';
 
-import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import { useConversationStore } from '@/store/conversationStore';
 import { Message } from '@/types';
 import { Mic, Paperclip, Send, Smile } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import AudioRecorder from './AudioRecorder';
+import { useMessages } from '@/hooks/useMessages';
 
 interface Props {
   conversationId: string;
@@ -14,6 +14,7 @@ interface Props {
 
 export default function MessageInput({ conversationId }: Props) {
   const agent = useAuthStore((s) => s.agent);
+  const { sendMessage } = useMessages();
   const addMessage = useConversationStore((s) => s.addMessageToConversation);
 
   const [text, setText] = useState('');
@@ -42,12 +43,10 @@ export default function MessageInput({ conversationId }: Props) {
     setText('');
 
     try {
-      const formData = new FormData();
-      formData.append('content', optimistic.content);
-      formData.append('type', 'Text');
-
-      await api.post(`/api/conversation/${conversationId}/messages`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      await sendMessage({
+        conversationId: conversationId,
+        content: optimistic.content,
+        type: 'Text',
       });
     } catch (err) {
       console.error('Failed to send message', err);

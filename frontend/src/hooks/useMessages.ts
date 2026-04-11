@@ -5,15 +5,22 @@ import { useConversationStore } from '@/store/conversationStore';
 import { Message } from '@/types';
 import { useCallback } from 'react';
 
-type SendPayload = {
+type MessagePayload = {
   conversationId: string;
   content: string;
   type?: Message['type'];
   file?: File | null;
 };
 
+type ReactionPayload = {
+  conversationId: string;
+  messageId: string;
+  emoji: string
+  from: string
+};
+
 export function useMessages() {
-  const { messages, setMessages } = useConversationStore();
+  const { messages, setMessages, addReaction } = useConversationStore();
 
   const getMessages = useCallback(
     async (conversationId: string) => {
@@ -27,7 +34,7 @@ export function useMessages() {
   );
 
   const sendMessage = useCallback(
-    async ({ conversationId, content, type = 'Text', file }: SendPayload) => {
+    async ({ conversationId, content, type = 'Text', file }: MessagePayload) => {
       const formData = new FormData();
       formData.append('content', content);
       formData.append('type', type);
@@ -44,5 +51,22 @@ export function useMessages() {
     [],
   );
 
-  return { messages, getMessages, sendMessage };
+  const sendReaction = useCallback(
+    async (
+      {conversationId, messageId, emoji, from}: ReactionPayload
+    ) => {
+      try {
+        await api.post(
+          `/api/conversation/${conversationId}/messages/${messageId}/react`,
+          { emoji },
+        );
+        addReaction(messageId, emoji, from, true);
+      } catch (err) {
+        console.error('Failed to send reaction', err);
+      }
+    },
+    [addReaction],
+  );
+
+  return { messages, getMessages, sendMessage, sendReaction };
 }

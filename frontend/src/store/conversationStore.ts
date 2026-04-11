@@ -98,7 +98,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
         newMessages[convId] = newMessages[convId].map((m) => {
           if (m.id !== messageId) return m;
           const alreadyExists = m.reactions.find(
-            (r) => r.emoji === emoji && r.fromPhoneNumber === from,
+            (r) => r.emoji === emoji && r.messageId === messageId,
           );
           if (alreadyExists) return m;
           return {

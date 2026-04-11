@@ -2,12 +2,12 @@
 
 import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
-import { useConversationStore } from '@/store/conversationStore';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Avatar from '../UI/Avatar';
 import { LogOut, Search } from 'lucide-react';
 import ConversationItem from './ConversationItem';
+import { useConversations } from '@/hooks/useConversations';
 
 type Tab = 'mine' | 'queue';
 
@@ -16,7 +16,7 @@ export default function ConversationList() {
   const agent = useAuthStore((s) => s.agent);
   const clearAuth = useAuthStore((s) => s.clearAuth);
 
-  const { myConversations, queue } = useConversationStore();
+  const { myConversations, queue } = useConversations();
 
   const [tab, setTab] = useState<Tab>('mine');
   const [search, setSearch] = useState('');
