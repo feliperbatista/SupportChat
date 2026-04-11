@@ -11,7 +11,7 @@ export default function StatusTick({ status }: Props) {
     case 'sent':
       return <Check className='w-3.5 h-3.5 text-wa-muted' />;
     case 'delivered':
-      return <Check className='w-3.5 h-3.5 text-wa-muted' />;
+      return <CheckCheck className='w-3.5 h-3.5 text-wa-muted' />;
     case 'read':
       return <CheckCheck className='w-3.5 h-3.5 text-blue-500' />;
     case 'failed':
