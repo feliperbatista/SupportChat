@@ -2,21 +2,14 @@
 
 import { joinConversation, leaveConversation } from '@/hooks/useSignalR';
 import { Conversation } from '@/types';
-import { format, isToday, isYesterday } from 'date-fns';
 import Avatar from '../UI/Avatar';
 import { useConversations } from '@/hooks/useConversations';
 import { useMessages } from '@/hooks/useMessages';
+import { formatBrazilDate } from '@/utils/date';
 
 interface Props {
   conversation: Conversation;
   isQueue: boolean;
-}
-
-function formatTime(dateStr: string) {
-  const date = new Date(dateStr);
-  if (isToday(date)) return format(date, 'HH:mm');
-  if (isYesterday(date)) return 'Yesterday';
-  return format(date, 'dd/MM/yyyy');
 }
 
 function getPreview(conv: Conversation) {
@@ -54,8 +47,8 @@ export default function ConversationItem({ conversation, isQueue }: Props) {
 
   const preview = getPreview(conversation);
   const time = conversation.lastMessage
-    ? formatTime(conversation.lastMessage.createdAt)
-    : formatTime(conversation.updatedAt);
+    ? formatBrazilDate(conversation.lastMessage.createdAt)
+    : formatBrazilDate(conversation.updatedAt);
 
   return (
     <button
